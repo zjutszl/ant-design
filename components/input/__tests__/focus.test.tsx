@@ -1,7 +1,10 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { spyElementPrototypes } from 'rc-util/lib/test/domHook';
+import { spyElementPrototypes } from '@rc-component/util';
+
 import Input from '..';
+import { fireEvent, render } from '../../../tests/utils';
+import type { InputRef } from '../Input';
+import type { TextAreaRef } from '../TextArea';
 
 const { TextArea } = Input;
 
@@ -30,8 +33,8 @@ describe('Input.Focus', () => {
   });
 
   it('start', () => {
-    const ref = React.createRef<Input>();
-    mount(<Input ref={ref} defaultValue="light" />);
+    const ref = React.createRef<InputRef>();
+    render(<TextArea ref={ref} defaultValue="light" />);
     ref.current!.focus({ cursor: 'start' });
 
     expect(focus).toHaveBeenCalled();
@@ -39,8 +42,8 @@ describe('Input.Focus', () => {
   });
 
   it('end', () => {
-    const ref = React.createRef<Input>();
-    mount(<Input ref={ref} defaultValue="light" />);
+    const ref = React.createRef<InputRef>();
+    render(<TextArea ref={ref} defaultValue="light" />);
     ref.current!.focus({ cursor: 'end' });
 
     expect(focus).toHaveBeenCalled();
@@ -48,11 +51,20 @@ describe('Input.Focus', () => {
   });
 
   it('all', () => {
-    const ref = React.createRef<any>();
-    mount(<TextArea ref={ref} defaultValue="light" />);
+    const ref = React.createRef<TextAreaRef>();
+    render(<TextArea ref={ref} defaultValue="light" />);
     ref.current!.focus({ cursor: 'all' });
 
     expect(focus).toHaveBeenCalled();
     expect(setSelectionRange).toHaveBeenCalledWith(expect.anything(), 0, 5);
+  });
+
+  it('disabled should reset focus', () => {
+    const { rerender, container } = render(<Input allowClear />);
+    fireEvent.focus(container.querySelector('input')!);
+    expect(container.querySelector('.ant-input-affix-wrapper-focused')).toBeTruthy();
+
+    rerender(<Input allowClear disabled />);
+    expect(container.querySelector('.ant-input-affix-wrapper-focused')).toBeFalsy();
   });
 });
